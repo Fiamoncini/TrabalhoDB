@@ -11,21 +11,8 @@ export default function Carrinho() {
   const { itens, total, atualizar, remover, limpar } = useCart()
   const navigate = useNavigate()
 
-  const [endereco, setEndereco] = useState({
-    rua: '',
-    numero: '',
-    bairro: '',
-    cidade: '',
-    estado: '',
-    cep: '',
-  })
   const [erro, setErro] = useState('')
   const [enviando, setEnviando] = useState(false)
-
-  function alterarCampo(e) {
-    const { name, value } = e.target
-    setEndereco((atual) => ({ ...atual, [name]: value }))
-  }
 
   async function finalizar(e) {
     e.preventDefault()
@@ -36,7 +23,7 @@ export default function Carrinho() {
     }
     setEnviando(true)
     try {
-      await criarPedido({ itens, enderecoEntrega: endereco })
+      await criarPedido({ itens })
       limpar()
       navigate('/meus-pedidos')
     } catch {
@@ -135,54 +122,6 @@ export default function Carrinho() {
 
           <form className="form" onSubmit={finalizar}>
             {erro && <p className="erro">{erro}</p>}
-
-            <label htmlFor="rua">Rua</label>
-            <input
-              id="rua"
-              name="rua"
-              value={endereco.rua}
-              onChange={alterarCampo}
-            />
-
-            <label htmlFor="numero">Numero</label>
-            <input
-              id="numero"
-              name="numero"
-              value={endereco.numero}
-              onChange={alterarCampo}
-            />
-
-            <label htmlFor="bairro">Bairro</label>
-            <input
-              id="bairro"
-              name="bairro"
-              value={endereco.bairro}
-              onChange={alterarCampo}
-            />
-
-            <label htmlFor="cidade">Cidade</label>
-            <input
-              id="cidade"
-              name="cidade"
-              value={endereco.cidade}
-              onChange={alterarCampo}
-            />
-
-            <label htmlFor="estado">Estado</label>
-            <input
-              id="estado"
-              name="estado"
-              value={endereco.estado}
-              onChange={alterarCampo}
-            />
-
-            <label htmlFor="cep">CEP</label>
-            <input
-              id="cep"
-              name="cep"
-              value={endereco.cep}
-              onChange={alterarCampo}
-            />
 
             <motion.button
               type="submit"
