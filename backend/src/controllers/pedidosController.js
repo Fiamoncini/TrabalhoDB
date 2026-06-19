@@ -17,6 +17,8 @@ export async function criar(req, res) {
 
   const pedido = await Pedido.create({
     usuario: req.usuario.id,
+    usuarioNome: req.usuario.nome,
+    usuarioEmail: req.usuario.email,
     itens: itens.map((i) => ({
       id: i.id,
       nome: i.nome,

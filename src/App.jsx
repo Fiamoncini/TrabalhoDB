@@ -4,6 +4,7 @@ import Topbar from './components/Topbar'
 import CategoryBar from './components/CategoryBar'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
+import { IconeCaminhao, IconeCadeado, IconeDevolucao } from './components/icons'
 import Catalogo from './pages/Catalogo'
 import ProdutoDetalhe from './pages/ProdutoDetalhe'
 import Carrinho from './pages/Carrinho'
@@ -16,9 +17,27 @@ export default function App() {
 
   return (
     <>
+      <a href="#conteudo" className="skip-link">
+        Pular para o conteúdo
+      </a>
+      <div className="barra-aviso">
+        <div className="container barra-aviso-inner">
+          <span>
+            <IconeCaminhao size={15} /> <b>Frete grátis</b> em produtos selecionados
+          </span>
+          <span className="sep esconde-mobile">•</span>
+          <span className="esconde-mobile">
+            <IconeCadeado size={15} /> Compra 100% segura
+          </span>
+          <span className="sep esconde-mobile">•</span>
+          <span className="esconde-mobile">
+            <IconeDevolucao size={15} /> Devolução fácil em até 7 dias
+          </span>
+        </div>
+      </div>
       <Topbar />
       <CategoryBar />
-      <main className="app-main">
+      <main className="app-main" id="conteudo">
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}

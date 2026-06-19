@@ -16,6 +16,10 @@ const itemSchema = new mongoose.Schema(
 const pedidoSchema = new mongoose.Schema(
   {
     usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true, index: true },
+    // Dados do cliente "fotografados" no pedido (denormalizacao — facilita
+    // exibir/filtrar quem comprou sem precisar de join com a colecao usuarios).
+    usuarioNome: { type: String },
+    usuarioEmail: { type: String },
     itens: { type: [itemSchema], default: [] },
     total: { type: Number, required: true },
     status: { type: String, default: 'confirmado' },

@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom'
 import { categorias } from '../mocks/produtos'
+import { IconeCasa } from './icons'
 
 export default function CategoryBar() {
   return (
-    <div className="categorias">
+    <nav className="categorias" aria-label="Categorias">
       <div className="container categorias-inner">
         <Link to="/" className="chip">
-          🏠 Início
+          <IconeCasa size={15} /> Início
         </Link>
         {categorias.map((c) => (
           <Link key={c.id} to={`/?categoria=${c.id}`} className="chip">
@@ -14,6 +15,6 @@ export default function CategoryBar() {
           </Link>
         ))}
       </div>
-    </div>
+    </nav>
   )
 }

@@ -3,6 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
+import {
+  IconeBusca,
+  IconeCarrinho,
+  IconeUsuario,
+  IconePacote,
+  IconeSair,
+} from './icons'
 
 export default function Topbar() {
   const [termo, setTermo] = useState('')
@@ -37,28 +44,28 @@ export default function Topbar() {
             aria-label="Buscar produtos"
           />
           <button type="submit" aria-label="Buscar">
-            🔍
+            <IconeBusca size={19} />
           </button>
         </form>
 
-        <nav className="topbar-acoes">
+        <nav className="topbar-acoes" aria-label="Conta e carrinho">
           {autenticado ? (
             <>
               <Link className="topbar-link" to="/meus-pedidos">
-                📦 <span>Meus pedidos</span>
+                <IconePacote size={17} /> <span>Meus pedidos</span>
               </Link>
               <button className="topbar-link" onClick={logout} type="button">
-                Olá, {primeiroNome} · Sair
+                <IconeSair size={16} /> <span>Olá, {primeiroNome} · Sair</span>
               </button>
             </>
           ) : (
             <Link className="topbar-link" to="/login">
-              👤 <span>Entrar</span>
+              <IconeUsuario size={17} /> <span>Entrar</span>
             </Link>
           )}
 
           <Link className="topbar-link carrinho-botao" to="/carrinho" aria-label="Carrinho">
-            🛒 <span>Carrinho</span>
+            <IconeCarrinho size={18} /> <span>Carrinho</span>
             {quantidadeTotal > 0 && (
               <motion.span
                 key={quantidadeTotal}

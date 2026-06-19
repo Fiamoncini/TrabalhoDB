@@ -39,12 +39,17 @@ export default function Login() {
         <p className="sub">Acesse sua conta para continuar comprando.</p>
 
         <form className="form" onSubmit={handleSubmit} noValidate>
-          {erro && <p className="erro">{erro}</p>}
+          {erro && (
+            <p className="erro" role="alert">
+              {erro}
+            </p>
+          )}
 
           <label htmlFor="email">Email</label>
           <input
             id="email"
             type="email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="seu@email.com"
@@ -54,6 +59,7 @@ export default function Login() {
           <input
             id="senha"
             type="password"
+            autoComplete="current-password"
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
             placeholder="Sua senha"

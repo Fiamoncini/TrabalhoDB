@@ -2,8 +2,17 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { obterProduto } from '../services/produtosService'
+import { categorias } from '../mocks/produtos'
 import { formatarPreco } from '../lib/formato'
 import { useCart } from '../context/CartContext'
+import { useToast } from '../context/ToastContext'
+import {
+  IconeEstrela,
+  IconeCaminhao,
+  IconeEscudo,
+  IconeDevolucao,
+  IconeCadeado,
+} from '../components/icons'
 
 // Converte o valor de um atributo (que pode ter tipos variados) em texto legivel.
 function formatarValorAtributo(valor) {
@@ -12,34 +21,68 @@ function formatarValorAtributo(valor) {
   return String(valor)
 }
 
-// Pagina de detalhe de um produto.
 export default function ProdutoDetalhe() {
   const { id } = useParams()
   const { adicionar } = useCart()
+  const { mostrar } = useToast()
 
   const [produto, setProduto] = useState(null)
   const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState('')
+  const [tentativa, setTentativa] = useState(0)
   const [quantidade, setQuantidade] = useState(1)
 
   // Busca o produto pelo id sempre que ele mudar.
   useEffect(() => {
     let ativo = true
     setCarregando(true)
-    obterProduto(id).then((resultado) => {
-      if (!ativo) return
-      setProduto(resultado)
-      setCarregando(false)
-    })
+    setErro('')
+    obterProduto(id)
+      .then((resultado) => {
+        if (ativo) setProduto(resultado)
+      })
+      .catch(() => {
+        if (ativo) setErro('Nao foi possivel carregar o produto.')
+      })
+      .finally(() => {
+        if (ativo) setCarregando(false)
+      })
     return () => {
       ativo = false
     }
-  }, [id])
+  }, [id, tentativa])
 
-  // Estado de carregamento.
+  // Estado de carregamento — esqueleto que espelha o layout.
   if (carregando) {
     return (
       <div className="container">
-        <p>Carregando...</p>
+        <div className="detalhe">
+          <div className="skeleton" style={{ aspectRatio: '1 / 1', borderRadius: 26 }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingTop: 8 }}>
+            <div className="skeleton" style={{ height: 30, width: '85%', borderRadius: 8 }} />
+            <div className="skeleton" style={{ height: 18, width: '40%', borderRadius: 8 }} />
+            <div className="skeleton" style={{ height: 40, width: '55%', borderRadius: 8 }} />
+            <div className="skeleton" style={{ height: 70, width: '100%', borderRadius: 8 }} />
+            <div className="skeleton" style={{ height: 140, width: '100%', borderRadius: 12 }} />
+            <div className="skeleton" style={{ height: 48, width: '100%', borderRadius: 999 }} />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Erro de rede.
+  if (erro) {
+    return (
+      <div className="container">
+        <div className="vazio">
+          <div className="vazio-emoji">⚠️</div>
+          <h2>Algo deu errado</h2>
+          <p>{erro}</p>
+          <button className="btn" type="button" onClick={() => setTentativa((t) => t + 1)}>
+            Tentar novamente
+          </button>
+        </div>
       </div>
     )
   }
@@ -61,6 +104,15 @@ export default function ProdutoDetalhe() {
 
   const atributos = produto.atributos || {}
   const chaves = Object.keys(atributos)
+  const temDesconto = produto.precoAntigo && produto.precoAntigo > produto.preco
+  const desconto = temDesconto
+    ? Math.round((1 - produto.preco / produto.precoAntigo) * 100)
+    : 0
+  const economia = temDesconto ? produto.precoAntigo - produto.preco : 0
+  const esgotado = produto.estoque === 0
+  const estoqueBaixo = produto.estoque > 0 && produto.estoque <= 5
+  const garantia = atributos.garantiaMeses
+  const categoria = categorias.find((c) => c.id === produto.categoria)
 
   function alterarQuantidade(delta) {
     setQuantidade((atual) => Math.max(1, atual + delta))
@@ -68,10 +120,23 @@ export default function ProdutoDetalhe() {
 
   function handleAdicionar() {
     adicionar(produto, quantidade)
+    mostrar('Adicionado ao carrinho', { link: '/carrinho', linkTexto: 'Ver carrinho' })
   }
 
   return (
     <div className="container">
+      <nav className="migalhas" aria-label="Trilha de navegacao">
+        <Link to="/">Início</Link>
+        {categoria && (
+          <>
+            <span className="sep">/</span>
+            <Link to={`/?categoria=${categoria.id}`}>{categoria.nome}</Link>
+          </>
+        )}
+        <span className="sep">/</span>
+        <span className="atual">{produto.nome}</span>
+      </nav>
+
       <motion.div
         className="detalhe"
         initial={{ opacity: 0, y: 8 }}
@@ -86,19 +151,39 @@ export default function ProdutoDetalhe() {
           <h1>{produto.nome}</h1>
 
           <p className="avaliacao">
-            <span aria-hidden="true">⭐</span> {produto.avaliacao}
+            <span className="estrelas">
+              <IconeEstrela size={16} />
+            </span>
+            <strong>{produto.avaliacao?.toFixed(1)}</strong>
+            {produto.vendidos != null && (
+              <span style={{ color: 'var(--texto-fraco)' }}>· {produto.vendidos} vendidos</span>
+            )}
           </p>
 
-          <p className="preco">{formatarPreco(produto.preco)}</p>
-          {produto.precoAntigo != null && (
-            <p>
-              <s>{formatarPreco(produto.precoAntigo)}</s>
+          <div className="detalhe-precos">
+            <span className="preco">{formatarPreco(produto.preco)}</span>
+            {temDesconto && (
+              <>
+                <span className="preco-antigo">{formatarPreco(produto.precoAntigo)}</span>
+                <span className="selo-desconto">-{desconto}%</span>
+              </>
+            )}
+          </div>
+          {temDesconto && (
+            <p className="economia">Você economiza {formatarPreco(economia)}</p>
+          )}
+
+          {esgotado ? (
+            <p className="detalhe-estoque estoque-baixo">Produto esgotado</p>
+          ) : estoqueBaixo ? (
+            <p className="detalhe-estoque estoque-baixo">
+              🔥 Últimas unidades — apenas {produto.estoque} em estoque
             </p>
+          ) : (
+            <p className="detalhe-estoque estoque-ok">Em estoque</p>
           )}
 
           <p>{produto.descricao}</p>
-
-          {produto.freteGratis && <span className="selo-frete">Frete gratis</span>}
 
           {chaves.length > 0 && (
             <div className="atributos">
@@ -124,12 +209,33 @@ export default function ProdutoDetalhe() {
           </div>
 
           <motion.button
-            className="btn btn-bloco"
+            className="btn btn-bloco btn-grande"
             whileTap={{ scale: 0.97 }}
             onClick={handleAdicionar}
+            disabled={esgotado}
+            style={{ marginTop: 14 }}
           >
-            Adicionar ao carrinho
+            {esgotado ? 'Esgotado' : 'Adicionar ao carrinho'}
           </motion.button>
+
+          <div className="detalhe-trust">
+            {produto.freteGratis && (
+              <span className="detalhe-trust-item">
+                <IconeCaminhao size={18} /> Frete grátis para esta compra
+              </span>
+            )}
+            {garantia != null && (
+              <span className="detalhe-trust-item">
+                <IconeEscudo size={18} /> Garantia de {garantia} meses
+              </span>
+            )}
+            <span className="detalhe-trust-item">
+              <IconeDevolucao size={18} /> Devolução grátis em até 7 dias
+            </span>
+            <span className="detalhe-trust-item">
+              <IconeCadeado size={18} /> Pagamento 100% seguro
+            </span>
+          </div>
         </div>
       </motion.div>
     </div>

@@ -37,7 +37,7 @@ describe('ProdutoDetalhe', () => {
 
   it('mostra o nome e o preco do produto depois de carregar', async () => {
     renderizar()
-    expect(await screen.findByText(/Fone de Ouvido/i)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /Fone de Ouvido/i })).toBeInTheDocument()
     expect(screen.getByText(/R\$\s*349,90/)).toBeInTheDocument()
   })
 
@@ -49,7 +49,7 @@ describe('ProdutoDetalhe', () => {
 
   it('adicionar ao carrinho aumenta a quantidade total de 0 para 1', async () => {
     renderizar()
-    await screen.findByText(/Fone de Ouvido/i)
+    await screen.findByRole('heading', { name: /Fone de Ouvido/i })
 
     expect(screen.getByTestId('qt')).toHaveTextContent('0')
 

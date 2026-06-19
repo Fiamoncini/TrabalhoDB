@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import ProdutoCard from '../components/ProdutoCard'
 import { listarProdutos } from '../services/produtosService'
 import { categorias, produtos as todosProdutos } from '../mocks/produtos'
 import { formatarPreco } from '../lib/formato'
+import { IconeCaminhao, IconeEscudo, IconeRaio } from '../components/icons'
 
 const PRECO_MAX = Math.ceil(Math.max(...todosProdutos.map((p) => p.preco)) / 100) * 100
 
@@ -26,20 +27,27 @@ export default function Catalogo() {
 
   const [produtos, setProdutos] = useState([])
   const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState('')
+  const [tentativa, setTentativa] = useState(0)
 
   useEffect(() => {
     let ativo = true
     setCarregando(true)
-    listarProdutos({ categoria, busca, ordenar }).then((lista) => {
-      if (ativo) {
-        setProdutos(lista)
-        setCarregando(false)
-      }
-    })
+    setErro('')
+    listarProdutos({ categoria, busca, ordenar })
+      .then((lista) => {
+        if (ativo) setProdutos(lista)
+      })
+      .catch(() => {
+        if (ativo) setErro('Nao foi possivel carregar os produtos.')
+      })
+      .finally(() => {
+        if (ativo) setCarregando(false)
+      })
     return () => {
       ativo = false
     }
-  }, [categoria, busca, ordenar])
+  }, [categoria, busca, ordenar, tentativa])
 
   const visiveis = useMemo(
     () => (precoMax != null ? produtos.filter((p) => p.preco <= precoMax) : produtos),
@@ -61,7 +69,41 @@ export default function Catalogo() {
     : nomeCategoria || 'Todos os produtos'
 
   return (
-    <div className="container catalogo">
+    <>
+      {!categoria && !busca && (
+        <div className="container">
+          <section className="hero-promo">
+            <div className="hero-promo-conteudo">
+              <span className="hero-tag">✦ Mercado NoSQL</span>
+              <h1>
+                Tudo que você precisa, com{' '}
+                <em>preços que cabem no bolso</em>
+              </h1>
+              <p>
+                Eletronicos, moda, calcados e muito mais — com entrega rapida e
+                frete gratis em produtos selecionados.
+              </p>
+              <div className="hero-acoes">
+                <a className="btn btn-ambar btn-grande" href="#grade-produtos">
+                  Ver ofertas
+                </a>
+              </div>
+              <div className="hero-vantagens">
+                <span className="hero-vantagem">
+                  <IconeCaminhao size={15} /> Frete gratis
+                </span>
+                <span className="hero-vantagem">
+                  <IconeEscudo size={15} /> Compra segura
+                </span>
+                <span className="hero-vantagem">
+                  <IconeRaio size={15} /> Entrega rapida
+                </span>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
+      <div className="container catalogo" id="grade-produtos">
       <aside className="filtros" aria-label="Filtros">
         <div className="filtros-grupo">
           <h3>Categorias</h3>
@@ -107,7 +149,7 @@ export default function Catalogo() {
         <div className="catalogo-topo">
           <div>
             <h1>{titulo}</h1>
-            <p className="catalogo-resultado">
+            <p className="catalogo-resultado" role="status" aria-live="polite">
               {carregando ? 'Carregando...' : `${visiveis.length} resultado(s)`}
             </p>
           </div>
@@ -132,11 +174,23 @@ export default function Catalogo() {
               <div key={i} className="skeleton skeleton-card" />
             ))}
           </div>
+        ) : erro ? (
+          <div className="vazio">
+            <div className="vazio-emoji">⚠️</div>
+            <h2>Algo deu errado</h2>
+            <p>{erro}</p>
+            <button className="btn" type="button" onClick={() => setTentativa((t) => t + 1)}>
+              Tentar novamente
+            </button>
+          </div>
         ) : visiveis.length === 0 ? (
           <div className="vazio">
             <div className="vazio-emoji">🔍</div>
             <h2>Nenhum produto encontrado</h2>
             <p>Tente ajustar a busca ou os filtros.</p>
+            <Link className="btn btn-secundario" to="/">
+              Ver todos os produtos
+            </Link>
           </div>
         ) : (
           <motion.div
@@ -154,6 +208,7 @@ export default function Catalogo() {
           </motion.div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   )
 }

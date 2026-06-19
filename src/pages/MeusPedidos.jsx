@@ -48,7 +48,14 @@ export default function MeusPedidos() {
   if (carregando) {
     return (
       <div className="container">
-        <p>Carregando...</p>
+        <h1 className="pagina-titulo">Meus pedidos</h1>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="skeleton"
+            style={{ height: 116, borderRadius: 16, marginBottom: 14 }}
+          />
+        ))}
       </div>
     )
   }
