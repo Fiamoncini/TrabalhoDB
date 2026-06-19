@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { obterProduto } from '../services/produtosService'
+import { obterProduto, listarProdutos } from '../services/produtosService'
 import { categorias } from '../mocks/produtos'
 import { formatarPreco } from '../lib/formato'
 import { useCart } from '../context/CartContext'
 import { useToast } from '../context/ToastContext'
+import ProdutoCard from '../components/ProdutoCard'
 import {
   IconeEstrela,
   IconeCaminhao,
@@ -31,6 +32,7 @@ export default function ProdutoDetalhe() {
   const [erro, setErro] = useState('')
   const [tentativa, setTentativa] = useState(0)
   const [quantidade, setQuantidade] = useState(1)
+  const [relacionados, setRelacionados] = useState([])
 
   useEffect(() => {
     let ativo = true
@@ -50,6 +52,20 @@ export default function ProdutoDetalhe() {
       ativo = false
     }
   }, [id, tentativa])
+
+  // Produtos relacionados (mesma categoria).
+  useEffect(() => {
+    if (!produto) return
+    let ativo = true
+    Promise.resolve(listarProdutos({ categoria: produto.categoria }))
+      .then((lista) => {
+        if (ativo) setRelacionados((lista || []).filter((p) => p.id !== produto.id).slice(0, 4))
+      })
+      .catch(() => {})
+    return () => {
+      ativo = false
+    }
+  }, [produto])
 
   // Carregando — esqueleto que espelha o layout.
   if (carregando) {
@@ -242,6 +258,17 @@ export default function ProdutoDetalhe() {
           )}
         </div>
       </motion.div>
+
+      {relacionados.length > 0 && (
+        <section className="detalhe-relacionados">
+          <h2>Você também pode gostar</h2>
+          <div className="grade-produtos">
+            {relacionados.map((p) => (
+              <ProdutoCard key={p.id} produto={p} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

@@ -1418,6 +1418,19 @@ ul {
 .detalhe-specs .atributos {
   margin: 0;
 }
+.detalhe-imagem img {
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.detalhe-imagem:hover img {
+  transform: scale(1.06);
+}
+.detalhe-relacionados {
+  margin: 12px 0 64px;
+}
+.detalhe-relacionados h2 {
+  font-size: 1.35rem;
+  margin-bottom: 18px;
+}
 
 /* ---------------- Movimento reduzido (a11y) ---------------- */
 @media (prefers-reduced-motion: reduce) {
