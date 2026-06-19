@@ -337,7 +337,7 @@ export const produtos = [
     precoAntigo: 279.9,
     categoria: 'beleza',
     estoque: 42,
-    imagem: 'https://images.unsplash.com/photo-1695679745509-9a90f1d714a6?ixid=M3wxMjA3fDB8MXxzZWFyY2h8N3x8d29tYW4lMjBibG93JTIwZHJ5aW5nJTIwaGFpciUyMGRyeWVyfGVufDB8Mnx8fDE3ODE4MzgyNDB8MA&ixlib=rb-4.1.0&w=700&h=700&fit=crop&crop=entropy&q=80',
+    imagem: 'https://images.unsplash.com/photo-1727364438136-6edc10ef0a52?q=80&w=627&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     freteGratis: false,
     avaliacao: 4.5,
     vendidos: 880,
