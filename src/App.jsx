@@ -4,6 +4,7 @@ import Topbar from './components/Topbar'
 import CategoryBar from './components/CategoryBar'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
+import ScrollToTop from './components/ScrollToTop'
 import { IconeCaminhao, IconeCadeado, IconeDevolucao } from './components/icons'
 import Catalogo from './pages/Catalogo'
 import ProdutoDetalhe from './pages/ProdutoDetalhe'
@@ -17,6 +18,7 @@ export default function App() {
 
   return (
     <>
+      <ScrollToTop />
       <a href="#conteudo" className="skip-link">
         Pular para o conteúdo
       </a>
