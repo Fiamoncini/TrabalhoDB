@@ -406,9 +406,11 @@ ul {
   gap: 8px;
   padding: 9px 14px;
   border-radius: var(--raio-full);
+  font-family: inherit;
   font-weight: 600;
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.92);
+  background: transparent;
   border: 1px solid transparent;
   transition: background 0.16s ease, border-color 0.16s ease;
 }
@@ -1357,6 +1359,64 @@ ul {
 .barra-aviso svg,
 .rodape-base svg {
   vertical-align: -2px;
+}
+
+/* ---------------- Detalhe: categoria, descricao e buy box ---------------- */
+.detalhe-tag {
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+}
+.detalhe-categoria {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--azul-500);
+}
+.detalhe-info h1 {
+  margin-top: 6px;
+}
+.detalhe-descricao {
+  color: var(--texto-suave);
+  line-height: 1.65;
+  margin: 8px 0 0;
+}
+.detalhe-compra {
+  background: var(--cinza-50);
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--raio);
+  padding: 22px;
+  margin: 20px 0;
+}
+.detalhe-compra .detalhe-precos {
+  margin-top: 0;
+}
+.detalhe-compra-acoes {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+}
+.detalhe-compra-acoes .qtd {
+  flex-shrink: 0;
+  height: 50px;
+}
+.detalhe-compra-acoes .qtd button {
+  height: 100%;
+}
+.detalhe-compra-acoes .btn {
+  flex: 1;
+}
+.detalhe-specs {
+  margin-top: 8px;
+}
+.detalhe-specs h2 {
+  font-size: 1.15rem;
+  margin: 8px 0 12px;
+}
+.detalhe-specs .atributos {
+  margin: 0;
 }
 
 /* ---------------- Movimento reduzido (a11y) ---------------- */
