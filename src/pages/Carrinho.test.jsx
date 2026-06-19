@@ -1,9 +1,16 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { CartProvider } from '../context/CartContext'
 import Carrinho from './Carrinho'
+import { criarPedido } from '../services/pedidosService'
+
+// Finalizar pedido chama a API. Mockamos o servico.
+vi.mock('../services/pedidosService', () => ({
+  criarPedido: vi.fn(async () => ({ id: 'ped1', status: 'confirmado' })),
+  listarPedidos: vi.fn(),
+}))
 
 function semearCarrinho() {
   localStorage.setItem(
@@ -25,7 +32,10 @@ function renderizar() {
 }
 
 describe('Carrinho', () => {
-  beforeEach(() => localStorage.clear())
+  beforeEach(() => {
+    localStorage.clear()
+    vi.clearAllMocks()
+  })
 
   it('mostra os itens do carrinho e o total', () => {
     semearCarrinho()
@@ -51,16 +61,18 @@ describe('Carrinho', () => {
     expect(screen.getByRole('link', { name: /ver produtos/i })).toBeInTheDocument()
   })
 
-  it('finalizar pedido cria um pedido e limpa o carrinho', async () => {
+  it('finalizar pedido chama a API com os itens e limpa o carrinho', async () => {
     semearCarrinho()
     renderizar()
 
     await userEvent.click(screen.getByRole('button', { name: /finalizar pedido/i }))
 
-    await waitFor(() => {
-      const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]')
-      expect(pedidos).toHaveLength(1)
-    })
+    await waitFor(() => expect(criarPedido).toHaveBeenCalledTimes(1))
+    expect(criarPedido).toHaveBeenCalledWith(
+      expect.objectContaining({
+        itens: expect.arrayContaining([expect.objectContaining({ id: 'p04', quantidade: 2 })]),
+      })
+    )
 
     await waitFor(() => {
       const carrinho = JSON.parse(localStorage.getItem('carrinho') || '[]')

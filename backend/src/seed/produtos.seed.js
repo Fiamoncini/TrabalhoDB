@@ -1,7 +1,7 @@
-// Dados mock — produtos de categorias variadas. Repare que o campo `atributos`
-// muda conforme a categoria (schema flexivel, o destaque do NoSQL).
-// As imagens vem do loremflickr POR PALAVRA-CHAVE (relevantes ao produto) e o
-// parametro `lock` deixa cada imagem estavel (sempre a mesma).
+// Dados iniciais do catalogo (espelham src/mocks/produtos.js do frontend).
+// O campo `atributos` muda conforme a categoria — o destaque do NoSQL.
+// As imagens (/imgs/...) sao servidas pelo frontend hospedado.
+
 export const categorias = [
   { id: 'eletronicos', nome: 'Eletronicos', emoji: '📱' },
   { id: 'roupas', nome: 'Roupas', emoji: '👕' },

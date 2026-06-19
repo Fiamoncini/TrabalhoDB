@@ -1,21 +1,26 @@
-import { produtos } from '../mocks/produtos'
-import { filtrarProdutos, ordenarProdutos } from '../lib/filtros'
+import api from '../api/client'
 
-// Camada de servico (a "costura" da fonte de dados).
-// Hoje usa os dados mock; para ligar na API real, basta trocar o corpo destas
-// funcoes por chamadas axios ao backend (ex.: api.get('/produtos')).
-
-// Pequeno atraso para simular rede e exibir os skeletons. Zero durante os testes.
-const ATRASO = import.meta.env.VITEST ? 0 : 320
-const espera = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+// Camada de servico de produtos — agora conversa com a API real.
+// A filtragem/ordenacao (categoria, busca, ordenar) acontece no backend.
 
 export async function listarProdutos({ categoria, busca, ordenar } = {}) {
-  await espera(ATRASO)
-  const filtrados = filtrarProdutos(produtos, { categoria, busca })
-  return ordenarProdutos(filtrados, ordenar || 'relevancia')
+  const params = {}
+  if (categoria) params.categoria = categoria
+  if (busca) params.busca = busca
+  if (ordenar) params.ordenar = ordenar
+
+  const { data } = await api.get('/produtos', { params })
+  return data
 }
 
 export async function obterProduto(id) {
-  await espera(ATRASO)
-  return produtos.find((produto) => produto.id === id) || null
+  try {
+    const { data } = await api.get(`/produtos/${id}`)
+    return data
+  } catch (err) {
+    // Produto inexistente -> o backend responde 404; aqui devolvemos null
+    // para a pagina mostrar o estado "produto nao encontrado".
+    if (err.response && err.response.status === 404) return null
+    throw err
+  }
 }

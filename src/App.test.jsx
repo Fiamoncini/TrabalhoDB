@@ -1,9 +1,16 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import App from './App'
+import { produtos } from './mocks/produtos'
+
+// A home renderiza o catalogo, que busca da API. Mockamos o servico.
+vi.mock('./services/produtosService', () => ({
+  listarProdutos: vi.fn(async () => produtos),
+  obterProduto: vi.fn(async (id) => produtos.find((p) => p.id === id) || null),
+}))
 
 function renderizar(rota = '/') {
   return render(
@@ -18,7 +25,10 @@ function renderizar(rota = '/') {
 }
 
 describe('App (integracao)', () => {
-  beforeEach(() => localStorage.clear())
+  beforeEach(() => {
+    localStorage.clear()
+    vi.clearAllMocks()
+  })
 
   it('renderiza a logo e o catalogo na home', async () => {
     renderizar('/')

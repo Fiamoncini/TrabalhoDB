@@ -12,14 +12,18 @@ export default function Login() {
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
 
-  function handleSubmit(e) {
+  const [enviando, setEnviando] = useState(false);
+
+  async function handleSubmit(e) {
     e.preventDefault();
     setErro('');
+    setEnviando(true);
     try {
-      login(email, senha);
+      await login(email, senha);
       navigate('/');
     } catch (err) {
       setErro(err.message);
+      setEnviando(false);
     }
   }
 
@@ -59,8 +63,9 @@ export default function Login() {
             type="submit"
             className="btn btn-bloco"
             whileTap={{ scale: 0.97 }}
+            disabled={enviando}
           >
-            Entrar
+            {enviando ? 'Entrando...' : 'Entrar'}
           </motion.button>
         </form>
 

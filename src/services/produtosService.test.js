@@ -1,42 +1,44 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import api from '../api/client'
 import { listarProdutos, obterProduto } from './produtosService'
-import { produtos } from '../mocks/produtos'
 
-describe('listarProdutos', () => {
-  it('retorna todos os produtos quando nao ha filtros', async () => {
+// O servico agora so faz a "costura" HTTP — mockamos o client axios.
+vi.mock('../api/client', () => ({
+  default: { get: vi.fn() },
+}))
+
+describe('produtosService', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('listarProdutos chama GET /produtos sem params quando nao ha filtros', async () => {
+    api.get.mockResolvedValue({ data: [{ id: 'p01' }] })
     const lista = await listarProdutos()
-    expect(lista).toHaveLength(produtos.length)
+    expect(api.get).toHaveBeenCalledWith('/produtos', { params: {} })
+    expect(lista).toEqual([{ id: 'p01' }])
   })
 
-  it('filtra por categoria', async () => {
-    const lista = await listarProdutos({ categoria: 'livros' })
-    expect(lista.length).toBeGreaterThan(0)
-    expect(lista.every((p) => p.categoria === 'livros')).toBe(true)
+  it('listarProdutos repassa categoria, busca e ordenar como query params', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    await listarProdutos({ categoria: 'eletronicos', busca: 'fone', ordenar: 'maior-preco' })
+    expect(api.get).toHaveBeenCalledWith('/produtos', {
+      params: { categoria: 'eletronicos', busca: 'fone', ordenar: 'maior-preco' },
+    })
   })
 
-  it('filtra por termo de busca no nome', async () => {
-    const lista = await listarProdutos({ busca: 'fone' })
-    expect(lista.every((p) => p.nome.toLowerCase().includes('fone'))).toBe(true)
-    expect(lista.length).toBeGreaterThan(0)
+  it('obterProduto retorna o produto quando existe', async () => {
+    api.get.mockResolvedValue({ data: { id: 'p01', nome: 'Fone' } })
+    const produto = await obterProduto('p01')
+    expect(api.get).toHaveBeenCalledWith('/produtos/p01')
+    expect(produto.id).toBe('p01')
   })
 
-  it('ordena por maior preco', async () => {
-    const lista = await listarProdutos({ ordenar: 'maior-preco' })
-    for (let i = 1; i < lista.length; i++) {
-      expect(lista[i - 1].preco).toBeGreaterThanOrEqual(lista[i].preco)
-    }
-  })
-})
-
-describe('obterProduto', () => {
-  it('retorna o produto pelo id', async () => {
-    const produto = await obterProduto('p09')
-    expect(produto).toBeTruthy()
-    expect(produto.id).toBe('p09')
+  it('obterProduto retorna null em caso de 404', async () => {
+    api.get.mockRejectedValue({ response: { status: 404 } })
+    expect(await obterProduto('nao-existe')).toBeNull()
   })
 
-  it('retorna null para id inexistente', async () => {
-    const produto = await obterProduto('nao-existe')
-    expect(produto).toBeNull()
+  it('obterProduto propaga erros que nao sejam 404', async () => {
+    api.get.mockRejectedValue({ response: { status: 500 } })
+    await expect(obterProduto('p01')).rejects.toBeTruthy()
   })
 })

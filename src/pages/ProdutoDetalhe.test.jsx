@@ -1,9 +1,17 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { CartProvider, useCart } from '../context/CartContext'
 import ProdutoDetalhe from './ProdutoDetalhe'
+import { produtos } from '../mocks/produtos'
+
+// A pagina busca o produto na API. Mockamos o servico para devolver o produto
+// mock correspondente ao id da rota.
+vi.mock('../services/produtosService', () => ({
+  obterProduto: vi.fn(async (id) => produtos.find((p) => p.id === id) || null),
+  listarProdutos: vi.fn(),
+}))
 
 // Pequeno consumidor que expoe a quantidade total do carrinho.
 function ContadorCarrinho() {
@@ -11,7 +19,7 @@ function ContadorCarrinho() {
   return <span data-testid="qt">{quantidadeTotal}</span>
 }
 
-function renderizar(rota = '/produto/p09') {
+function renderizar(rota = '/produto/p01') {
   return render(
     <MemoryRouter initialEntries={[rota]}>
       <CartProvider>
@@ -29,19 +37,19 @@ describe('ProdutoDetalhe', () => {
 
   it('mostra o nome e o preco do produto depois de carregar', async () => {
     renderizar()
-    expect(await screen.findByText(/NoSQL na Pratica/i)).toBeInTheDocument()
-    expect(screen.getByText(/R\$\s*94,90/)).toBeInTheDocument()
+    expect(await screen.findByText(/Fone de Ouvido/i)).toBeInTheDocument()
+    expect(screen.getByText(/R\$\s*349,90/)).toBeInTheDocument()
   })
 
   it('mostra ao menos um atributo (chave e valor)', async () => {
     renderizar()
-    expect(await screen.findByText('autor')).toBeInTheDocument()
-    expect(screen.getByText('A. Pereira')).toBeInTheDocument()
+    expect(await screen.findByText('conectividade')).toBeInTheDocument()
+    expect(screen.getByText('Bluetooth 5.3')).toBeInTheDocument()
   })
 
   it('adicionar ao carrinho aumenta a quantidade total de 0 para 1', async () => {
     renderizar()
-    await screen.findByText(/NoSQL na Pratica/i)
+    await screen.findByText(/Fone de Ouvido/i)
 
     expect(screen.getByTestId('qt')).toHaveTextContent('0')
 

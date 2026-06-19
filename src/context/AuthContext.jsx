@@ -1,8 +1,9 @@
 import { createContext, useContext, useMemo, useState } from 'react'
+import api from '../api/client'
 
-// Autenticacao MOCK (sem backend): valida campos basicos, cria uma sessao
-// falsa e persiste no localStorage. Para usar a API real, troque login/cadastrar
-// por chamadas axios (ex.: api.post('/auth/login')).
+// Autenticacao via API real: login/cadastro chamam o backend, recebem um JWT
+// e persistem usuario + token no localStorage (o token e usado pelo interceptor
+// do axios em api/client.js).
 
 const AuthContext = createContext(null)
 
@@ -13,16 +14,6 @@ function lerUsuario() {
   } catch {
     return null
   }
-}
-
-// Deriva um nome amigavel a partir do email (ex.: "joao.silva@x.com" -> "Joao Silva").
-function nomeDoEmail(email) {
-  const base = email.split('@')[0].replace(/[._-]+/g, ' ').trim()
-  return base
-    .split(' ')
-    .filter(Boolean)
-    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-    .join(' ') || 'Cliente'
 }
 
 export function AuthProvider({ children }) {
@@ -36,22 +27,30 @@ export function AuthProvider({ children }) {
     setToken(novoToken)
   }
 
-  function login(email, senha) {
+  async function login(email, senha) {
     if (!email || !senha) {
       throw new Error('Informe email e senha.')
     }
-    const novoUsuario = { nome: nomeDoEmail(email), email }
-    persistir(novoUsuario, 'mock.jwt.token')
-    return novoUsuario
+    try {
+      const { data } = await api.post('/auth/login', { email, senha })
+      persistir(data.usuario, data.token)
+      return data.usuario
+    } catch (err) {
+      throw new Error(err.response?.data?.erro || 'Nao foi possivel entrar. Tente novamente.')
+    }
   }
 
-  function cadastrar(nome, email, senha) {
+  async function cadastrar(nome, email, senha) {
     if (!nome || !email || !senha) {
       throw new Error('Preencha todos os campos.')
     }
-    const novoUsuario = { nome, email }
-    persistir(novoUsuario, 'mock.jwt.token')
-    return novoUsuario
+    try {
+      const { data } = await api.post('/auth/register', { nome, email, senha })
+      persistir(data.usuario, data.token)
+      return data.usuario
+    } catch (err) {
+      throw new Error(err.response?.data?.erro || 'Nao foi possivel criar a conta. Tente novamente.')
+    }
   }
 
   function logout() {

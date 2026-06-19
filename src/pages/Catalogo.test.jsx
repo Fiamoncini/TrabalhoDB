@@ -1,12 +1,22 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { CartProvider } from '../context/CartContext'
 import Catalogo from './Catalogo'
 import { produtos } from '../mocks/produtos'
+import { filtrarProdutos, ordenarProdutos } from '../lib/filtros'
 
-const totalLivros = produtos.filter((p) => p.categoria === 'livros').length
+// O catalogo busca da API. Mockamos o servico para devolver os dados mock ja
+// filtrados/ordenados (mesma semantica do backend), sem precisar de rede.
+vi.mock('../services/produtosService', () => ({
+  listarProdutos: vi.fn(async ({ categoria, busca, ordenar } = {}) =>
+    ordenarProdutos(filtrarProdutos(produtos, { categoria, busca }), ordenar || 'relevancia')
+  ),
+  obterProduto: vi.fn(),
+}))
+
+const totalEletronicos = produtos.filter((p) => p.categoria === 'eletronicos').length
 
 function renderizar(rota = '/') {
   return render(
@@ -28,9 +38,9 @@ describe('Catalogo', () => {
   })
 
   it('filtra por categoria vinda da query string', async () => {
-    renderizar('/?categoria=livros')
+    renderizar('/?categoria=eletronicos')
     const cards = await screen.findAllByRole('article')
-    expect(cards).toHaveLength(totalLivros)
+    expect(cards).toHaveLength(totalEletronicos)
   })
 
   it('filtra por termo de busca vindo da query string', async () => {
@@ -44,9 +54,9 @@ describe('Catalogo', () => {
     renderizar()
     await screen.findAllByRole('article')
     const sidebar = screen.getByRole('complementary')
-    await userEvent.click(within(sidebar).getByRole('button', { name: /^livros$/i }))
+    await userEvent.click(within(sidebar).getByRole('button', { name: /^eletronicos$/i }))
     const cards = await screen.findAllByRole('article')
-    expect(cards).toHaveLength(totalLivros)
+    expect(cards).toHaveLength(totalEletronicos)
   })
 
   it('filtra por preco maximo vindo da query string', async () => {

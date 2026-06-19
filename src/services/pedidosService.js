@@ -1,46 +1,14 @@
-import { calcularTotal } from '../lib/carrinho'
+import api from '../api/client'
 
-// Servico de pedidos MOCK (persiste no localStorage). Para usar a API real,
-// troque por api.post('/pedidos') e api.get('/pedidos').
-
-const CHAVE = 'pedidos'
-const ATRASO = import.meta.env.VITEST ? 0 : 250
-const espera = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-
-function ler() {
-  try {
-    const salvo = localStorage.getItem(CHAVE)
-    return salvo ? JSON.parse(salvo) : []
-  } catch {
-    return []
-  }
-}
-
-let contador = 0
+// Servico de pedidos — agora usa a API real (rotas protegidas por token).
+// O token Bearer e injetado automaticamente pelo interceptor em api/client.js.
 
 export async function criarPedido({ itens, enderecoEntrega }) {
-  await espera(ATRASO)
-  contador += 1
-  const pedido = {
-    id: `ped-${Date.now()}-${contador}`,
-    itens: itens.map((i) => ({
-      id: i.id,
-      nome: i.nome,
-      preco: i.preco,
-      imagem: i.imagem,
-      quantidade: i.quantidade,
-    })),
-    total: calcularTotal(itens),
-    status: 'confirmado',
-    enderecoEntrega,
-    criadoEm: new Date().toISOString(),
-  }
-  const lista = [pedido, ...ler()]
-  localStorage.setItem(CHAVE, JSON.stringify(lista))
-  return pedido
+  const { data } = await api.post('/pedidos', { itens, enderecoEntrega })
+  return data
 }
 
 export async function listarPedidos() {
-  await espera(ATRASO)
-  return ler()
+  const { data } = await api.get('/pedidos')
+  return data
 }

@@ -12,15 +12,18 @@ export default function Cadastro() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
+  const [enviando, setEnviando] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setErro('');
+    setEnviando(true);
     try {
-      cadastrar(nome, email, senha);
+      await cadastrar(nome, email, senha);
       navigate('/');
     } catch (err) {
       setErro(err.message);
+      setEnviando(false);
     }
   }
 
@@ -64,8 +67,9 @@ export default function Cadastro() {
             whileTap={{ scale: 0.97 }}
             className="btn btn-bloco"
             type="submit"
+            disabled={enviando}
           >
-            Criar conta
+            {enviando ? 'Criando conta...' : 'Criar conta'}
           </motion.button>
         </form>
 
