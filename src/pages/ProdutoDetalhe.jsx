@@ -125,9 +125,12 @@ export default function ProdutoDetalhe() {
   const estoqueBaixo = produto.estoque > 0 && produto.estoque <= 5
   const garantia = atributos.garantiaMeses
   const categoria = categorias.find((c) => c.id === produto.categoria)
+  // Nao deixa escolher mais do que ha em estoque.
+  const maxQuantidade = produto.estoque > 0 ? produto.estoque : 1
+  const noMaximo = quantidade >= maxQuantidade
 
   function alterarQuantidade(delta) {
-    setQuantidade((atual) => Math.max(1, atual + delta))
+    setQuantidade((atual) => Math.min(Math.max(1, atual + delta), maxQuantidade))
   }
 
   function handleAdicionar() {
@@ -202,11 +205,21 @@ export default function ProdutoDetalhe() {
 
             <div className="detalhe-compra-acoes">
               <div className="qtd">
-                <button type="button" onClick={() => alterarQuantidade(-1)} aria-label="Diminuir quantidade">
+                <button
+                  type="button"
+                  onClick={() => alterarQuantidade(-1)}
+                  disabled={esgotado || quantidade <= 1}
+                  aria-label="Diminuir quantidade"
+                >
                   −
                 </button>
                 <span>{quantidade}</span>
-                <button type="button" onClick={() => alterarQuantidade(1)} aria-label="Aumentar quantidade">
+                <button
+                  type="button"
+                  onClick={() => alterarQuantidade(1)}
+                  disabled={esgotado || noMaximo}
+                  aria-label="Aumentar quantidade"
+                >
                   +
                 </button>
               </div>

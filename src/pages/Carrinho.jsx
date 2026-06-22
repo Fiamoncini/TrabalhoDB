@@ -26,8 +26,9 @@ export default function Carrinho() {
       await criarPedido({ itens })
       limpar()
       navigate('/meus-pedidos')
-    } catch {
-      setErro('Nao foi possivel finalizar o pedido.')
+    } catch (err) {
+      // Surfacing a mensagem do backend (ex.: estoque insuficiente) quando houver.
+      setErro(err?.response?.data?.erro || 'Nao foi possivel finalizar o pedido.')
       setEnviando(false)
     }
   }

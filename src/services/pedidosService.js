@@ -12,3 +12,9 @@ export async function listarPedidos() {
   const { data } = await api.get('/pedidos')
   return data
 }
+
+// Exclui (cancela) um pedido. O backend repoe os itens no estoque.
+export async function excluirPedido(id) {
+  const { data } = await api.delete(`/pedidos/${id}`)
+  return data
+}

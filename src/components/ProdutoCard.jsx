@@ -15,6 +15,7 @@ export default function ProdutoCard({ produto }) {
     : 0
   const economia = temDesconto ? produto.precoAntigo - produto.preco : 0
   const esgotado = produto.estoque === 0
+  const estoqueBaixo = produto.estoque > 0 && produto.estoque <= 5
 
   function adicionarAoCarrinho() {
     adicionar(produto)
@@ -62,6 +63,20 @@ export default function ProdutoCard({ produto }) {
         {produto.freteGratis && (
           <span className="selo-frete">
             <IconeCaminhao size={14} /> Frete grátis
+          </span>
+        )}
+
+        {produto.estoque != null && (
+          <span
+            className={`produto-estoque ${
+              esgotado ? 'estoque-esgotado' : estoqueBaixo ? 'estoque-baixo' : 'estoque-ok'
+            }`}
+          >
+            {esgotado
+              ? 'Sem estoque'
+              : estoqueBaixo
+                ? `🔥 Últimas ${produto.estoque} unidades`
+                : `${produto.estoque} em estoque`}
           </span>
         )}
 

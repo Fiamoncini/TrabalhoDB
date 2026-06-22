@@ -1432,6 +1432,44 @@ ul {
   margin-bottom: 18px;
 }
 
+/* ---------------- Estoque no card ---------------- */
+.produto-estoque {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.produto-estoque.estoque-ok {
+  color: var(--texto-fraco);
+}
+.produto-estoque.estoque-baixo {
+  color: var(--ambar-700);
+}
+.produto-estoque.estoque-esgotado {
+  color: var(--vermelho);
+}
+
+/* Botoes de quantidade desabilitados (limite de estoque / minimo 1). */
+.qtd button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------------- Rodape do pedido + acao de excluir ---------------- */
+.pedido-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.btn-perigo {
+  color: var(--vermelho);
+  border-color: var(--vermelho-claro);
+}
+.btn-perigo:hover {
+  background: var(--vermelho-claro);
+  border-color: var(--vermelho);
+}
+
 /* ---------------- Movimento reduzido (a11y) ---------------- */
 @media (prefers-reduced-motion: reduce) {
   *,

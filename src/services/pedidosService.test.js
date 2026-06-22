@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import api from '../api/client'
-import { criarPedido, listarPedidos } from './pedidosService'
+import { criarPedido, listarPedidos, excluirPedido } from './pedidosService'
 
 vi.mock('../api/client', () => ({
-  default: { get: vi.fn(), post: vi.fn() },
+  default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() },
 }))
 
 const itens = [
@@ -33,5 +33,12 @@ describe('pedidosService', () => {
   it('listarPedidos devolve lista vazia quando nao ha pedidos', async () => {
     api.get.mockResolvedValue({ data: [] })
     expect(await listarPedidos()).toEqual([])
+  })
+
+  it('excluirPedido chama DELETE /pedidos/:id e devolve o resultado', async () => {
+    api.delete.mockResolvedValue({ data: { ok: true, id: 'ped1' } })
+    const resultado = await excluirPedido('ped1')
+    expect(api.delete).toHaveBeenCalledWith('/pedidos/ped1')
+    expect(resultado).toEqual({ ok: true, id: 'ped1' })
   })
 })
